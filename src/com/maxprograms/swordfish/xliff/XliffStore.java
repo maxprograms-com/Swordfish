@@ -816,6 +816,8 @@ public class XliffStore {
 						logger.log(Level.WARNING, "Error parsing custom metadata for unit " + currentUnit, jse);
 					}
 				}
+			} else if (metadata != null) {
+				customMetadataString = metadataToJson(metadata.getChildren("mda:metaGroup"));
 			}
 			insertMetadata.setString(1, currentFile);
 			insertMetadata.setString(2, currentUnit);
@@ -869,6 +871,12 @@ public class XliffStore {
 				}
 			}
 
+			if (!sourcePreserve) {
+				source = XliffUtils.normalizeSpaces(source);
+			}
+			if (!"preserve".equals(target.getAttributeValue("xml:space", "default"))) {
+				target = XliffUtils.normalizeSpaces(target);
+			}
 			List<String> segmentNotes = new Vector<>();
 			if (!notesMap.isEmpty()) {
 				segmentNotes.addAll(harvestNotes(source));
@@ -927,6 +935,36 @@ public class XliffStore {
 		insertContextStmt.setString(2, currentUnit);
 		insertContextStmt.setString(3, string);
 		insertContextStmt.execute();
+	}
+
+	private String metadataToJson(List<Element> groups) {
+		JSONObject json = new JSONObject();
+		JSONArray groupsArray = new JSONArray();
+		for (Element group : groups) {
+			JSONObject groupJson = new JSONObject();
+			if (group.hasAttribute("id")) {
+				groupJson.put("id", group.getAttributeValue("id"));
+			}
+			if (group.hasAttribute("category")) {
+				groupJson.put("category", group.getAttributeValue("category"));
+			}
+			if (group.hasAttribute("appliesTo")) {
+				groupJson.put("appliesTo", group.getAttributeValue("appliesTo"));
+			}
+			JSONArray metaArray = new JSONArray();
+			List<Element> items = group.getChildren("mda:meta");
+			for (Element item : items) {
+				JSONObject metaJson = new JSONObject();
+				metaJson.put("type", item.getAttributeValue("type"));
+				metaJson.put("value", item.getText());
+				metaArray.put(metaJson);
+			}
+			groupJson.put("meta", metaArray);
+			groupsArray.put(groupJson);
+			// OpenXLIFF doesn't use nested metaGroups, so we can ignore them
+		}
+		json.put("data", groupsArray);
+		return json.toString(2);
 	}
 
 	private JSONObject getJsonMetadata(Element metadata) {
@@ -5473,8 +5511,8 @@ public class XliffStore {
 			if (node.getNodeType() == XMLNode.TEXT_NODE && !textFound) {
 				String text = ((TextNode) node).getText();
 				for (int j = 0; j < text.length(); j++) {
-					char c = text.charAt(j);
-					if (!Character.isWhitespace(c)) {
+					char c = text.charAt(j);					
+					if (!(Character.isWhitespace(c) || c == '\u00A0')) {
 						textFound = true;
 						break;
 					}
@@ -5491,7 +5529,7 @@ public class XliffStore {
 				String text = ((TextNode) node).getText();
 				for (int j = text.length() - 1; j >= 0; j--) {
 					char c = text.charAt(j);
-					if (!Character.isWhitespace(c)) {
+					if (!(Character.isWhitespace(c) || c == '\u00A0')) {
 						textFound = true;
 						break;
 					}

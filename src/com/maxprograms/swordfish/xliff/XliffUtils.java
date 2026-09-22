@@ -680,4 +680,48 @@ public class XliffUtils {
 			return 0;
 		}
 	}
+
+	public static Element normalizeSpaces(Element source) {
+		List<XMLNode> content = source.getContent();
+		int first = -1;
+		int last = -1;
+		for (int i = 0; i < content.size(); i++) {
+			XMLNode node = content.get(i);
+			if (node.getNodeType() == XMLNode.TEXT_NODE) {
+				if (first == -1) {
+					first = i;
+				}
+				last = i;
+				String text = ((TextNode) node).getText();
+				text = text.replace("\n", " ");
+				text = text.replace("\t", " ");
+				text = text.replace("\r", " ");
+				while (text.contains("  ")) {
+					text = text.replace("  ", " ");
+				}
+				node = new TextNode(text);
+				content.set(i, node);
+			}
+		}
+		if (first != -1 && first == 0) {
+			XMLNode node = content.get(first);
+			String text = ((TextNode) node).getText().trim();
+			if (text.isEmpty()) {
+				node = new TextNode("");
+				content.set(first, node);
+			}
+		}
+		if (last != -1 && last == content.size() - 1) {
+			XMLNode node = content.get(last);
+			String text = ((TextNode) node).getText().trim();
+			if (text.isEmpty()) {
+				node = new TextNode("");
+				content.set(last, node);
+			}
+		}
+		Element result = new Element(source.getName());
+		result.setAttributes(source.getAttributes());
+		result.setContent(content);
+		return result;
+	}
 }
