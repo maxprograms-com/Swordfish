@@ -21,7 +21,7 @@
         "url": "https://github.com/maxprograms-com/Swordfish.git"
     },
     "devDependencies": {
-        "electron": "^44.4.3",
+        "electron": "^44.9.1",
         "typescript": "^6.0.3"
     },
     "dependencies": {
