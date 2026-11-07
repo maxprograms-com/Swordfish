@@ -10,7 +10,7 @@
  *     Maxprograms - initial API and implementation
  *******************************************************************************/
 
-import { ipcRenderer, clipboard, IpcRendererEvent } from "electron";
+import { ipcRenderer, IpcRendererEvent } from "electron";
 
 export class PromptDialog {
 
@@ -29,8 +29,7 @@ export class PromptDialog {
         });
         document.getElementById('copyButton')?.addEventListener('click', () => {
             const promptInput: HTMLTextAreaElement = document.getElementById('promptInput') as HTMLTextAreaElement;
-            clipboard.writeText(promptInput.value);
-            ipcRenderer.send('show-notification', 'Prompt copied to clipboard');
+            ipcRenderer.send('copy-to-clipboard', promptInput.value);
         });
         document.getElementById('pasteButton')?.addEventListener('click', () => {
             ipcRenderer.send('paste-response');

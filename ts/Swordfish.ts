@@ -703,6 +703,10 @@ export class Swordfish {
         ipcMain.on('insert-response', (event: IpcMainEvent, arg: any) => {
             Swordfish.insertResponse(arg);
         });
+        ipcMain.on('copy-to-clipboard', (event: IpcMainEvent, text: string) => {
+            clipboard.writeText(text);
+            Swordfish.showNotification('Prompt copied to clipboard');
+        });
         ipcMain.on('close-promptDialog', () => {
             if (Swordfish.promptWindow && !Swordfish.promptWindow.isDestroyed()) {
                 Swordfish.promptWindow.close();

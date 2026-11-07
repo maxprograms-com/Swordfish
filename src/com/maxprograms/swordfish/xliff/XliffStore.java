@@ -5511,7 +5511,7 @@ public class XliffStore {
 			if (node.getNodeType() == XMLNode.TEXT_NODE && !textFound) {
 				String text = ((TextNode) node).getText();
 				for (int j = 0; j < text.length(); j++) {
-					char c = text.charAt(j);					
+					char c = text.charAt(j);
 					if (!(Character.isWhitespace(c) || c == '\u00A0')) {
 						textFound = true;
 						break;
